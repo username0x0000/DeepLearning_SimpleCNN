@@ -1,5 +1,24 @@
+import torch
+import sys
+sys.path.append('.')
+from backbone import *
+from head import *
 
-def get_model(cfg):
+
+class Model(nn.Module):
+    def __init__(self, cfg, pick_model): # cfg.MODEL
+        if pick_model == 'ResNet50':
+            self.backbone = ResNet50_backbone(cfg['ResNet50']['backbone'])
+            self.head = ResNet50_head(cfg['ResNet50']['head'])
+    
+    def forward(self, x):
+        x = self.backbone.forward(x)
+        x = self.head.forward(x)
+        return x
+
+
+def get_model(cfg, pick_model):
+    return Model(cfg, pick_model)
     """
     cfg에 따라 backbone, head를 조합하여 model 리턴
     """

@@ -9,15 +9,18 @@ DATA = {
     }
 
 MODEL = {
-    'backbone': {
-        'type': 'ResNet50',
-        'first_layer':{'input_channels':0, 'output_channels':0, 'stride':0}
-        # ...
+    'ResNet50':{
+        'backbone': {
+            'first_layer':{'input_channels':64, 'output_channels':64, 'stride':1, 'layer_num':3},
+            'second_layer':{'input_channels':64, 'output_channels':128, 'stride':2, 'layer_num':4},
+            'third_layer':{'input_channels':128, 'output_channels':256, 'stride':2, 'layer_num':6},
+            'forth_layer':{'input_channels':256, 'output_channels':512, 'stride':2, 'layer_num':3},
         },
-    'head': {
-        'type': 'MlpClassifier',
-        # ...
-        },
+        'head':{
+            'input_feature':512,
+            'class_num':10
+        }
+    },
     }
 
 LOSS = {
