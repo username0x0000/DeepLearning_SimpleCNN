@@ -7,6 +7,7 @@ class MlpClassifier(nn.Module):
 
 class ResNet50_head(nn.Module):
     def __init__(self, cfg): # cfg.MODEL['ResNet50']['head']
+        super().__init__()
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(cfg['input_feature'], cfg['class_num'])
 

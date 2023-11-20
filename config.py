@@ -11,6 +11,7 @@ DATA = {
 MODEL = {
     'ResNet50':{
         'backbone': {
+            'input_channels':1,
             'first_layer':{'input_channels':64, 'output_channels':64, 'stride':1, 'layer_num':3},
             'second_layer':{'input_channels':64, 'output_channels':128, 'stride':2, 'layer_num':4},
             'third_layer':{'input_channels':128, 'output_channels':256, 'stride':2, 'layer_num':6},

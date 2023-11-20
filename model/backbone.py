@@ -7,6 +7,7 @@ import config as cfg
 
 class ResBlock(nn.Module):
     def __init__(self, input_channels, output_channels, stride):
+        super().__init__()
         self.conv1 = nn.Conv2d(input_channels, output_channels, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(output_channels)
         self.relu = nn.ReLU(inplace=True)
@@ -39,8 +40,8 @@ class ResBlock(nn.Module):
 
 class ResNet50_backbone(nn.Module):
     def __init__(self, cfg): # cfg.MODEL['ResNet51']['backbone']
-        super.__init__()
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        super().__init__()
+        self.conv1 = nn.Conv2d(cfg['input_channels'], 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -49,7 +50,7 @@ class ResNet50_backbone(nn.Module):
         self.layer2 = self._make_layer(cfg['second_layer'])
         self.layer3 = self._make_layer(cfg['third_layer'])
         self.layer4 = self._make_layer(cfg['forth_layer'])
-    
+
     def _make_layer(self, cfg):
         layers = []
         input_channels, output_channels, stride, layer_num = cfg['input_channels'], cfg['output_channels'], cfg['stride'], cfg['layer_num']
