@@ -1,6 +1,7 @@
 import torch
 import sys
 sys.path.append('.')
+import config as cfg
 from backbone import *
 from head import *
 
@@ -33,3 +34,8 @@ def test_model():
     이미지는 그냥 shape만 맞춘 torch.Tensor 만들어 사용
     """
     pass
+
+
+if __name__ == '__main__':
+    model = get_model(cfg.MODEL, 'ResNet50')
+    print('model load')

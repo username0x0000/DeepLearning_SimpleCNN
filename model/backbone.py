@@ -39,6 +39,7 @@ class ResBlock(nn.Module):
 
 class ResNet50_backbone(nn.Module):
     def __init__(self, cfg): # cfg.MODEL['ResNet51']['backbone']
+        super.__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
