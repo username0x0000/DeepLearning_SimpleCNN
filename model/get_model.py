@@ -34,10 +34,7 @@ def get_model(cfg, pick_model):
 def test_model():
     model = get_model(cfg.MODEL, 'ResNet50')
     dataloader = get_dataloader(cfg)
-    img, label = dataloader.train_data[0]
-    img = torch.Tensor(np.array(img))
-    img.unsqueeze_(0)
-    img.unsqueeze_(0)
+    img = torch.zeros((10, 1, 32, 32))
     model.forward(img)
     """
     get_model()로 model을 만들고 임의의 이미지를 넣었을 때 에러 없이 돌아가는지 확인
