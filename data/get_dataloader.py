@@ -24,7 +24,7 @@ class CustomDataset(Dataset):
         return random_split(data, [train_data_len, len(data)-train_data_len])
     
     def __len__(self):
-        return self.train_data
+        return len(self.train_data)
     
     def __getitem__(self, index):
         data, label = self.train_data[index]
@@ -36,6 +36,20 @@ class CustomDataLoader(DataLoader):
         self.cfg = cfg
         self.train_data = CustomDataset(cfg=cfg, data_path=path, train=True)
         self.test_data = CustomDataset(cfg=cfg, data_path=path, train=False)
+    
+    def __len__(self):
+        return len(self.train_data)
+    
+    def get_items(self, index, index_end=False):
+        if not index_end:
+            data, label = self.train_data[index]
+        else:
+            data, label = [], []
+            for idx in range(index, index_end):
+                d, l = self.train_data[idx]
+                data.append(d)
+                label.append(l)
+        return data, label
 
 
 def get_dataloader(cfg, path='.'):

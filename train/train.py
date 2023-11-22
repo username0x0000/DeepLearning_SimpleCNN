@@ -10,6 +10,7 @@ from backbone import *
 from head import *
 from get_model import *
 from get_dataloader import *
+from trainer import *
 
 
 def train_main():
@@ -20,6 +21,10 @@ def train_main():
 
     trainer = Trainer(model, loss, optimizer, cfg.TRAIN)
     trainer.train(dataloader)
+    print('--------')
+    print('train_fin')
+    print('--------')
+    exit()
 
     dataloader = get_dataloader(cfg.DATA, 'validation')
     validater = Validater(model)
@@ -34,7 +39,7 @@ def get_loss(cfg):
 
 
 def get_optimizer(cfg, model):
-    optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4)
+    return optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4)
 
 
 if __name__ == '__main__':
