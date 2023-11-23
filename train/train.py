@@ -21,10 +21,6 @@ def train_main():
 
     trainer = Trainer(model, loss, optimizer, cfg.TRAIN)
     trainer.train(dataloader)
-    print('--------')
-    print('train_fin')
-    print('--------')
-    exit()
 
     dataloader = get_dataloader(cfg.DATA, 'validation')
     validater = Validater(model)
