@@ -2,74 +2,64 @@ import os, sys
 import torch
 from torchvision.transforms import ToTensor
 from torchvision import datasets
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import Dataset, DataLoader
 sys.path.append(os.path.abspath('.'))
 import config as cfg
 import cv2
 from PIL import Image
 import numpy as np
-
+import pickle
+import struct
 
 class CustomDataset(Dataset):
-    def __init__(self, cfg, data_path, train=True):
-        self.data = cfg.DATA
-        data = datasets.MNIST(root=data_path, train=train)
-        if train:
-            self.train_data, self.validation_data = self.train_vali_split(data)
-        else:
-            self.test_data = data
-    
-    def train_vali_split(self, data):
-        train_data_len = int(len(data) * self.data['test_vali_split'])
-        return random_split(data, [train_data_len, len(data)-train_data_len])
+    def __init__(self, cfg, train=True, data_path='.'):
+        self.cfg = cfg
+        files = os.listdir(data_path)
+        img_array, label_array = [], []
+        for file in files:
+            file = os.path.join(data_path, file)
+            with open(file, 'rb') as f:
+                zero, data_type, dims = struct.unpack('>HBB', f.read(4))
+                shape = tuple(struct.unpack('>I', f.read(4))[0] for d in range(dims))
+                if 'images' in file:
+                    img_array.extend(np.frombuffer(f.read(), dtype=np.uint8).reshape(shape))
+                else:
+                    label_array.extend(np.frombuffer(f.read(), dtype=np.uint8).reshape(shape))
+        
+        self.data = []
+        for img, label in zip(img_array, label_array):
+            foo, bar = Image.fromarray(img), label
+            self.data.append([Image.fromarray(img), label])
+            
+        print(len(self.data))
+        exit()
     
     def __len__(self):
-        return len(self.train_data)
+        return len(self.data)
     
     def __getitem__(self, index):
-        data, label = self.train_data[index]
+        data, label = self.data[index]
         return data, label
 
-
-class CustomDataLoader(DataLoader):
-    def __init__(self, cfg, path='.'):
-        self.cfg = cfg
-        self.train_data = CustomDataset(cfg=cfg, data_path=path, train=True)
-        self.test_data = CustomDataset(cfg=cfg, data_path=path, train=False)
-    
-    def __len__(self):
-        return len(self.train_data)
-    
-    def get_items(self, index, index_end=False):
-        if not index_end:
-            data, label = self.train_data[index]
-        else:
-            data, label = [], []
-            for idx in range(index, index_end):
-                d, l = self.train_data[idx]
-                data.append(d)
-                label.append(l)
-        return data, label
-
-
-def get_dataloader(cfg, path='.'):
-    cur_path = os.path.abspath(path)
-    if not os.path.exists(os.path.join(cur_path, 'MNIST')):
-        datasets.MNIST(cur_path, train=True, download=True)
-        datasets.MNIST(cur_path, train=False, download=True)
-    custom_dataloader = CustomDataLoader(cfg=cfg, path=path)
+def get_dataloader(cfg, train=True, path='.'):
+    if cfg['type'] == 'MNIST' and not os.path.exists(os.path.join(path, 'MNIST')):
+        datasets.MNIST(path, train=train, download=True)
+    path = os.path.join(path, cfg['type'], 'raw')
+    customDataset = CustomDataset(cfg, train, path)
+    custom_dataloader = DataLoader(dataset=customDataset, batch_size=cfg['batch_size'], shuffle=cfg['shuffle'], iter=cfg['iter'])
     return custom_dataloader
 
 
-def test_dataloader(cfg, dataloader):
+def test_dataloader(cfg):
+    dataloader = get_dataloader(cfg=cfg, train=True, path='C:/Users/ghost/workspace/DeepLearning_SimpleCNN')
     for i in range(10):
-        img, label = dataloader.train_data[i]
+        img, label = dataloader[i]
         img = np.array(img)
+        cv2.imshow('as', img)
         cv2.imshow(str(label), img)
         cv2.waitKey()
         cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
-    dataloader = get_dataloader(cfg=cfg)
-    test_dataloader(cfg=cfg, dataloader=dataloader)
+    test_dataloader(cfg.DATA)

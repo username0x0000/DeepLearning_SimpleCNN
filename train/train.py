@@ -11,6 +11,7 @@ from head import *
 from get_model import *
 from get_dataloader import *
 from trainer import *
+from validatater import *
 
 
 def train_main():
@@ -22,9 +23,8 @@ def train_main():
     trainer = Trainer(model, loss, optimizer, cfg.TRAIN)
     trainer.train(dataloader)
 
-    dataloader = get_dataloader(cfg.DATA, 'validation')
-    validater = Validater(model)
-    validater.eval(dataloader)
+    # validater = Validatater(model, loss)
+    # validater.eval(dataloader)
 
 
 def get_loss(cfg):

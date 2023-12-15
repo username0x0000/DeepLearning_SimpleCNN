@@ -1,2 +1,4 @@
 MNIST/
 test.py
+CIFAR10/
+*/__pycache__
