@@ -55,7 +55,7 @@ def test_dataloader(cfg):
     train_dataloader = get_dataloader(cfg=cfg, train=True, path='C:/Users/ghost/workspace/DeepLearning_SimpleCNN')
     test_dataloader = get_dataloader(cfg=cfg, train=False, path='C:/Users/ghost/workspace/DeepLearning_SimpleCNN')
     imgs, labels = next(iter(test_dataloader))
-    for label, img in zip(labels, imgs):
+    for img, label in zip(imgs, labels):
         img = img.detach().cpu().numpy()
         print(label)
         cv2.imshow('asdf', img)
