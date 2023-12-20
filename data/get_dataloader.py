@@ -14,6 +14,10 @@ import struct
 class CustomDataset(Dataset):
     def __init__(self, cfg, train=True, data_path='.'):
         self.cfg = cfg
+        data_loda_func = {'MNIST':self._load_mnist}
+        self.data = data_loda_func[cfg['type']](data_path)
+    
+    def _load_mnist(self, data_path):
         files = os.listdir(data_path)
         img_array, label_array = [], []
         for file in files:
@@ -26,13 +30,10 @@ class CustomDataset(Dataset):
                 else:
                     label_array.extend(np.frombuffer(f.read(), dtype=np.uint8).reshape(shape))
         
-        self.data = []
+        data = []
         for img, label in zip(img_array, label_array):
-            foo, bar = Image.fromarray(img), label
-            self.data.append([Image.fromarray(img), label])
-            
-        print(len(self.data))
-        exit()
+            data.append([img, label])
+        return data
     
     def __len__(self):
         return len(self.data)
@@ -44,19 +45,20 @@ class CustomDataset(Dataset):
 def get_dataloader(cfg, train=True, path='.'):
     if cfg['type'] == 'MNIST' and not os.path.exists(os.path.join(path, 'MNIST')):
         datasets.MNIST(path, train=train, download=True)
-    path = os.path.join(path, cfg['type'], 'raw')
+    path = os.path.join(path, cfg['type'])
     customDataset = CustomDataset(cfg, train, path)
-    custom_dataloader = DataLoader(dataset=customDataset, batch_size=cfg['batch_size'], shuffle=cfg['shuffle'], iter=cfg['iter'])
+    custom_dataloader = DataLoader(dataset=customDataset, batch_size=cfg['batch_size'], shuffle=cfg['shuffle'])
     return custom_dataloader
 
 
 def test_dataloader(cfg):
-    dataloader = get_dataloader(cfg=cfg, train=True, path='C:/Users/ghost/workspace/DeepLearning_SimpleCNN')
-    for i in range(10):
-        img, label = dataloader[i]
-        img = np.array(img)
-        cv2.imshow('as', img)
-        cv2.imshow(str(label), img)
+    train_dataloader = get_dataloader(cfg=cfg, train=True, path='C:/Users/ghost/workspace/DeepLearning_SimpleCNN')
+    test_dataloader = get_dataloader(cfg=cfg, train=False, path='C:/Users/ghost/workspace/DeepLearning_SimpleCNN')
+    imgs, labels = next(iter(test_dataloader))
+    for label, img in zip(labels, imgs):
+        img = img.detach().cpu().numpy()
+        print(label)
+        cv2.imshow('asdf', img)
         cv2.waitKey()
         cv2.destroyAllWindows()
 
