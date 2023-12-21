@@ -17,3 +17,13 @@ class ResNet50_head(nn.Module):
         x = self.fc(x)
         return x
 
+
+class Test_head(nn.Module):
+    def __init__(self, cfg): # cfg.MODEL['ResNet50']['head']
+        super().__init__()
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(cfg['input_feature'], cfg['class_num'])
+
+    def forward(self, x):
+        print(x.shape)
+        return x
