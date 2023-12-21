@@ -10,21 +10,33 @@ class Validatater():
 
     def eval(self, dataloader):
         with torch.no_grad():
-            inputs, labels = dataloader.get_items(0, len(dataloader.test_data))
-            to_tensor = ToTensor()
-            for n, input in enumerate(inputs):
-                inputs[n] = to_tensor(input).unsqueeze(0)
-            inputs = torch.cat(inputs).to('cuda')
-            labels = torch.Tensor(labels).long().to('cuda')
+            correct_predictions, total_samples = 0,0
+            for inputs, labels in dataloader:
+                inputs = inputs.unsqueeze(1)
+                inputs = inputs.to('cuda').float()
+                labels = labels.to('cuda')
             
-            outputs = self.model.forward(inputs)
-            
-            loss = self.loss(outputs, labels)
+                outputs = self.model.forward(inputs)
+                
+                loss = self.loss(outputs, labels)
 
-            # 정확도 계산
-            _, predicted = outputs.max(1)
-            correct_predictions += predicted.eq(labels).sum().item()
-            total_samples += lables.size(0)
-            
-            accuracy = correct_predictions / total_samples
+                # 정확도 계산
+                # loss = self.loss(outputs[1], labels[1])
+                # print(outputs.shape)
+                # print(outputs[0])
+                # print(loss)
+                print(loss.item())
+                exit()
+                _, predicted = outputs.max(1)
+                print(_)
+                print('==============')
+                print(predicted)
+                print('==============')
+                print(labels)
+                exit()
+                _, predicted = outputs.max(1)
+                correct_predictions += predicted.eq(labels).sum().item()
+                total_samples += labels.size(0)
+                
+                accuracy = correct_predictions / total_samples
         print(f'Validation Accuracy: {accuracy * 100:.2f}%')

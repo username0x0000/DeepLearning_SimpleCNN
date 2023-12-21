@@ -3,7 +3,7 @@ DATA = {
     'type': 'MNIST',
     'resolution': (32, 32),
     'test_vali_split': 0.2,
-    'batch_size': 32,
+    'batch_size': 64,
     'shuffle': True,
     'iter': 50,
     'epochs': 30

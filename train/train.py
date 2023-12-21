@@ -14,17 +14,23 @@ from trainer import *
 from validatater import *
 
 
-def train_main():
-    dataloader = get_dataloader(cfg=cfg)
-    model = get_model(cfg.MODEL, 'ResNet50')
-    loss = get_loss(cfg.LOSS)
-    optimizer = get_optimizer(cfg.OPTIMIZER, model)
+def train_main(pretrained=False):
+    if pretrained:
+        model = torch.load('model.pth')
+        loss = get_loss(cfg.LOSS)
+    else:
+        train_dataloader = get_dataloader(cfg=cfg.DATA)
+        model = get_model(cfg.MODEL, 'ResNet50')
+        loss = get_loss(cfg.LOSS)
+        optimizer = get_optimizer(cfg.OPTIMIZER, model)
 
-    trainer = Trainer(model, loss, optimizer, cfg.TRAIN)
-    trainer.train(dataloader)
+        trainer = Trainer(model, loss, optimizer, cfg.TRAIN)
+        trainer.train(train_dataloader)
+        torch.save(model, 'model.pth')
 
-    # validater = Validatater(model, loss)
-    # validater.eval(dataloader)
+    test_dataloader = get_dataloader(cfg=cfg.DATA, train=False)
+    validater = Validatater(model, loss)
+    validater.eval(test_dataloader)
 
 
 def get_loss(cfg):
@@ -39,4 +45,4 @@ def get_optimizer(cfg, model):
 
 
 if __name__ == '__main__':
-    train_main()
+    train_main(True)
