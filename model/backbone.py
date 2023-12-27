@@ -69,3 +69,45 @@ class ResNet50_backbone(nn.Module):
         x = self.layer3(x)
         result = self.layer4(x)
         return result
+
+
+class VGG(nn.Module):
+    def __init__(self, cfg):
+        super().__init__()
+        
+        self.layer1 = self._make_layer([64, 64])
+        self.layer2 = self._make_layer([128, 128])
+        self.layer3 = self._make_layer([256, 256, 256, 256])
+        self.layer4 = self._make_layer([512, 512, 512, 512])
+        self.layer5 = self._make_layer([512, 512, 512, 512])
+    
+    def _make_layer(self, channels):
+        conv64 = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        conv128 = nn.Conv2d(1, 128, kernel_size=3, stride=1, padding=1, bias=False)
+        conv256 = nn.Conv2d(1, 256, kernel_size=3, stride=1, padding=1, bias=False)
+        conv512 = nn.Conv2d(1, 512, kernel_size=3, stride=1, padding=1, bias=False)
+        
+        layers = []
+        
+        for channel in channels:
+            if channel == 64:
+                layers.append(conv64)
+            elif channel == 128:
+                layers.append(conv128)
+            elif channel == 256:
+                layers.append(conv256)
+            elif channel == 512:
+                layers.append(conv512)
+        
+        maxpool = nn.MaxPool2d(kernel_size=2, stride=2, padding=1)
+        layers.append(maxpool)
+        
+        return nn.Sequential(*layers)
+    
+    def forward(self, x):
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        result = self.layer5(x)
+        return result
