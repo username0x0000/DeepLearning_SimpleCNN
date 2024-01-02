@@ -45,4 +45,4 @@ def get_optimizer(cfg, model):
 
 
 if __name__ == '__main__':
-    train_main(True)
+    train_main(False)

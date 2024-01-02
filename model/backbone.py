@@ -71,7 +71,7 @@ class ResNet50_backbone(nn.Module):
         return result
 
 
-class VGG(nn.Module):
+class VGG_backbone(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         

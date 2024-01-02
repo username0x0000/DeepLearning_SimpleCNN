@@ -2,11 +2,7 @@ from torch import nn
 
 
 class MlpClassifier(nn.Module):
-    pass
-
-
-class ResNet50_head(nn.Module):
-    def __init__(self, cfg): # cfg.MODEL['ResNet50']['head']
+    def __init__(self, cfg):
         super().__init__()
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(cfg['input_feature'], cfg['class_num'])

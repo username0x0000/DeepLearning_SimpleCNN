@@ -15,7 +15,10 @@ class Model(nn.Module):
         super().__init__()
         if pick_model == 'ResNet50':
             self.backbone = ResNet50_backbone(cfg['ResNet50']['backbone'])
-            self.head = ResNet50_head(cfg['ResNet50']['head'])
+            self.head = MlpClassifier(cfg['ResNet50']['head'])
+        elif pick_model == 'VGG':
+            self.backbone = VGG_backbone(cfg['VGG'])
+            self.head = MlpClassifier(cfg['VGG']['head'])
         else:
             self.backbone = ResNet50_backbone(cfg['ResNet50']['backbone'])
             self.head = Test_head(cfg['ResNet50']['head'])

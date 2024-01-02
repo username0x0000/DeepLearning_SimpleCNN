@@ -23,6 +23,15 @@ MODEL = {
             'class_num':10
         }
     },
+    'VGG':{
+        'backbone':{
+            'input_channels':1,
+        },
+        'head':{
+            'input_feature':512,
+            'class_num':10
+        }
+    },
     }
 
 LOSS = {
