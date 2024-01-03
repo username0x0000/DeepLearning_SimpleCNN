@@ -2,4 +2,5 @@ MNIST/
 test.py
 CIFAR10/
 */__pycache__
+.idea/
 *.pth
