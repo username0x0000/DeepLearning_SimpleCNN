@@ -1,5 +1,6 @@
 import torch
 from torchvision.transforms import ToTensor
+from tqdm import tqdm
 
 
 class Trainer():
@@ -14,7 +15,7 @@ class Trainer():
         epochs = self.cfg['epochs']
         for epoch in range(epochs):
             running_loss = 0.0
-            for inputs, labels in dataloader:
+            for inputs, labels in tqdm(dataloader, desc='Processing', unit='Iteration'):
             # for i in range(int(len(dataloader)/64)):
             #     inputs, labels = next(iter(dataloader))
                 inputs = inputs.unsqueeze(1)
