@@ -10,6 +10,7 @@ class Validatater():
 
     def eval(self, dataloader):
         with torch.no_grad():
+            accuracy = 0
             correct_predictions, total_samples = 0,0
             for inputs, labels in dataloader:
                 inputs = inputs.unsqueeze(1)
@@ -21,22 +22,10 @@ class Validatater():
                 loss = self.loss(outputs, labels)
 
                 # 정확도 계산
-                # loss = self.loss(outputs[1], labels[1])
-                # print(outputs.shape)
-                # print(outputs[0])
-                # print(loss)
-                print(loss.item())
-                exit()
-                _, predicted = outputs.max(1)
-                print(_)
-                print('==============')
-                print(predicted)
-                print('==============')
-                print(labels)
-                exit()
                 _, predicted = outputs.max(1)
                 correct_predictions += predicted.eq(labels).sum().item()
                 total_samples += labels.size(0)
                 
                 accuracy = correct_predictions / total_samples
         print(f'Validation Accuracy: {accuracy * 100:.2f}%')
+        return accuracy
