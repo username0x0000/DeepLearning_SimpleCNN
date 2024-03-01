@@ -1,2 +1,4 @@
 MNIST/
 test.py
+*.pth
+__pycache__
