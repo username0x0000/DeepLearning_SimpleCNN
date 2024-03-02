@@ -1,10 +1,10 @@
 
 DATA = {
-    'type': 'MNIST',
+    'type': 'COCO',
     'resolution': (32, 32),
     'test_vali_split': 0.2,
     'batch_size': 64,
-    'shuffle': True
+    'shuffle': False
     }
 
 MODEL = {

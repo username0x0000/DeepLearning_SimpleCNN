@@ -1,20 +1,20 @@
 import os, sys
-import torch
-from torchvision.transforms import ToTensor
 from torchvision import datasets
 from torch.utils.data import Dataset, DataLoader
-sys.path.append(os.path.abspath('.'))
-import config as cfg
 import cv2
-from PIL import Image
 import numpy as np
-import pickle
 import struct
+import json
+import PIL
+from pycocotools.coco import COCO
+sys.path.append(os.path.abspath('..'))
+import config as cfg
 
 class CustomDataset(Dataset):
     def __init__(self, cfg, train=True, data_path='.'):
         self.cfg = cfg
-        data_loda_func = {'MNIST':self._load_mnist}
+        self.train = train
+        data_loda_func = {'MNIST':self._load_mnist, 'COCO':self._load_coco}
         self.data = data_loda_func[cfg['type']](data_path)
     
     def _load_mnist(self, data_path):
@@ -35,6 +35,49 @@ class CustomDataset(Dataset):
             data.append([img, label])
         return data
     
+    def _load_coco(self, data_path):
+        if self.train:
+            train_val_info_path = os.path.join(data_path, 'annotations_trainval2017/annotations')
+            train_image_path = os.path.join(data_path, 'train2017')
+            val_image_path = os.path.join(data_path, 'val2017')
+
+            val_info = COCO(os.path.join(train_val_info_path, 'instances_val2017.json'))
+            train_info = COCO(os.path.join(train_val_info_path, 'instances_train2017.json'))
+
+            train_image_list = []
+            for coco_id in train_info.anns:
+                ann = train_info.loadAnns(coco_id)[0]
+                img_id = ann['image_id']
+                category_id = ann['category_id']
+                bbox = ann['bbox']
+                img_path = os.path.join(train_image_path, train_info.loadImgs(img_id)[0]['file_name'])
+                train_image_list.append([img_path, {'category':category_id, 'bbox':bbox}])
+
+            val_image_list = []
+            for coco_id in val_info.anns:
+                ann = val_info.loadAnns(coco_id)[0]
+                img_id = ann['image_id']
+                category_id = ann['category_id']
+                bbox = ann['bbox']
+                img_path = os.path.join(val_image_path, val_info.loadImgs(img_id)[0]['file_name'])
+                val_image_list.append([img_path, {'category':category_id, 'bbox':bbox}])
+            return train_image_list + val_image_list
+
+        else:
+            test_image_path = os.path.join(data_path, 'test2017')
+            # test_info = os.path.join(data_path, 'image_info_test2017/annotations/')
+            # test_info = COCO(test_info)
+            # train_info = COCO(os.path.join(train_val_info_path, 'instances_train2017.json'))
+            #
+            # train_image_list = []
+            # for coco_id in train_info.anns:
+            #     ann = train_info.loadAnns(coco_id)[0]
+            #     img_id = ann['image_id']
+            #     category_id = train_info.loadCats(ann['category_id'])
+            #     bbox = ann['bbox']
+            #     img_path = os.path.join(train_image_path, train_info.loadImgs(img_id)[0]['file_name'])
+            #     train_image_list.append([[img_path], {'category':category_id, 'bbox':bbox}])
+    
     def __len__(self):
         return len(self.data)
     
@@ -52,15 +95,24 @@ def get_dataloader(cfg, train=True, path='.'):
 
 
 def test_dataloader(cfg):
-    train_dataloader = get_dataloader(cfg=cfg, train=True, path='C:/Users/ghost/workspace/DeepLearning_SimpleCNN')
-    test_dataloader = get_dataloader(cfg=cfg, train=False, path='C:/Users/ghost/workspace/DeepLearning_SimpleCNN')
-    imgs, labels = next(iter(test_dataloader))
-    for img, label in zip(imgs, labels):
-        img = img.detach().cpu().numpy()
-        print(label)
+    train_dataloader = get_dataloader(cfg=cfg, train=True, path='.')
+    test_dataloader = get_dataloader(cfg=cfg, train=False, path='.')
+
+    imgs, labels = next(iter(train_dataloader))
+    idx = 0
+    for img in imgs:
+        category = labels['category'][idx]
+        pt1, pt2, pt3, pt4 = labels['bbox'][0][idx], labels['bbox'][1][idx], labels['bbox'][2][idx], labels['bbox'][3][idx]
+        pt1, pt2, pt3, pt4 = int(pt1) , int(pt2), int(pt3), int(pt4)
+        print(category)
+        img = cv2.imread(img)
+        cv2.rectangle(img, (pt1, pt2), [pt1+pt3, pt2+pt4], color=[255, 0, 0], thickness=3)
         cv2.imshow('asdf', img)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
+        k = cv2.waitKey()
+        if k == 120:
+            cv2.destroyAllWindows()
+            exit()
+        idx += 1
 
 
 if __name__ == '__main__':
