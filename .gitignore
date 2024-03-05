@@ -1,6 +1,5 @@
-MNIST/
+/data/*/
 test.py
-CIFAR10/
 */__pycache__
 .idea/
 *.pth
