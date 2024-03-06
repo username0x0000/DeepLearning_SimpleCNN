@@ -1,7 +1,7 @@
 import torch
 from torch import nn
-import sys
-sys.path.append('.')
+import sys, os
+sys.path.append(os.path.abspath('..'))
 import config as cfg
 
 
@@ -20,7 +20,6 @@ class ResBlock(nn.Module):
                 nn.Conv2d(input_channels, output_channels, kernel_size=1, stride=stride, bias=False),
                 nn.BatchNorm2d(output_channels)
             )
-        pass
 
     def forward(self, x):
         start = x
@@ -111,3 +110,74 @@ class VGG_backbone(nn.Module):
         x = self.layer4(x)
         result = self.layer5(x)
         return result
+
+
+class Darknet53_ResBlock(nn.Module):
+    def __init__(self, input_channels):
+        super().__init__()
+        half_input_channels = int(input_channels)
+        self.conv1 = nn.Conv2d(input_channels, half_input_channels, kernel_size=1, stride=1, padding=0, bias=False)
+        self.bn1 = nn.BatchNorm2d(half_input_channels)
+        self.conv2 = nn.Conv2d(half_input_channels, input_channels, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(input_channels)
+        self.activation = nn.LeakyReLU(0.1)
+
+    def forward(self, x):
+        start = x
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.activation(out)
+        out = self.conv2(out)
+        out = self.bn2(out)
+        return self.activation(out+start)
+
+
+class Darknet53(nn.Module):
+    def __init__(self, cfg):
+        super().__init__()
+        self.layers = [] # [neck_output, layer]
+        self.layers.append([False, nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, stride=1)])
+        self.layers.append([False, nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1)])
+        self.layers.append([False, nn.MaxPool2d(kernel_size=2, stride=2)])
+
+        self.layers.append([False, self._make_layer(64, 1)])
+        self.layers.append([False, nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1)])
+        self.layers.append([False, nn.MaxPool2d(kernel_size=2, stride=2)])
+
+        self.layers.append([True, self._make_layer(128, 2)])
+        self.layers.append([False, nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=1)])
+        self.layers.append([False, nn.MaxPool2d(kernel_size=2, stride=2)])
+
+        self.layers.append([True, self._make_layer(256, 8)])
+        self.layers.append([False, nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, stride=1)])
+        self.layers.append([False, nn.MaxPool2d(kernel_size=2, stride=2)])
+
+        self.layers.append([True, self._make_layer(512, 8)])
+        self.layers.append([False, nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, stride=1)])
+        self.layers.append([False, nn.MaxPool2d(kernel_size=2, stride=2)])
+
+        self.layers.append([True, self._make_layer(1024, 4)])
+    
+    def _make_layer(self, input_channels, layer_num):
+        layers = []
+        for num in range(layer_num):
+            layers.append(Darknet53_ResBlock(input_channels))
+        return nn.Sequential(*layers)
+
+    def forward(self, x):
+        output = []
+        for neck_output, layer in self.layers:
+            x = layer(x)
+            if neck_output:
+                output.appned(x)
+        return output
+
+
+if __name__ == '__main__':
+    # res = ResNet50_backbone(cfg=cfg.MODEL['ResNet50']['backbone'])
+    # print(res)
+    # print()
+    # print('--'*30)
+    # print()
+    darknet = Darknet53(cfg=1)
+    print(darknet)
